@@ -10,7 +10,9 @@
 unsigned char pwm_width;
 bit pwm_flag = 0;
 
-void delay_ms(int t);
+int count, C;
+
+//void delay_ms(int t);
 void pwm_setup(unsigned char speed){
 	TMOD = 0;
 	pwm_width = speed;
@@ -20,6 +22,24 @@ void pwm_setup(unsigned char speed){
 }
 
 void timer0() interrupt 1 {
+	C++;
+	if(C<=1){
+		C2 = C3 = 1;
+		C1 = 0;
+		Num = pwm_width % 10;
+	}else if(C<=2){
+		C1 = 1;
+		C2 = 0;
+		Num = (pwm_width/10) % 10;
+	}else if(C<=3){
+		C2 = 1;
+		C3 = 0;
+		Num = pwm_width/100;
+	}else {
+		C = 0;
+		C3 = 1;
+	}
+		
 	if(!pwm_flag) {	//Start of High level
 		pwm_flag = 1;	//Set flag
 		PWMPIN = 1;	//Set PWM o/p pin
@@ -38,44 +58,42 @@ void timer0() interrupt 1 {
 
 void btn1() interrupt 0 {
 	if(pwm_width < 128)//if(pwm_width < 256)
+		++count;
+	if(count>16383)
+	{
+		count = 0;
 		++pwm_width;
+	}
 }
 
 void btn2() interrupt 2 {
 	if(pwm_width > 0)
+		++count;
+	if(count>16383)
+	{
+		count = 0;
 		--pwm_width;
+	}
 }
-
+/*
 void show_num(){
-	C2 = C3 = 1;
-	C1 = 0;
-	Num = pwm_width % 10;
-	delay_ms(10);
 	
-	C1 = 1;
-	C2 = 0;
-	Num = (pwm_width/10) % 10;
-	delay_ms(10);
-	
-	C2 = 1;
-	C3 = 0;
-	Num = pwm_width/100;
-	delay_ms(10);
-	
-	C3 = 1;
-}
+}*/
 void main()
 {
+	IE = 7;
+	count = 0;
+	C = 0;
 	pwm_setup(30);
 	P2 = 0x01;
 	while(1)
 	{
+		//show_num();
 	}
 
-}
-
+}/*
 void delay_ms(int t){
 	int i;
 	while(t--)
 		for(i=0;i<1000;++i);
-}
+}*/
