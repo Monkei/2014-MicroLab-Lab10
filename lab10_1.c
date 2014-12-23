@@ -28,11 +28,11 @@ void timer0() interrupt 1 {
 			C2 = C3 = 1;
 			C1 = 0;
 			Num = pwm_width % 10;
-		}else if(C<=4){
+		}else if(C<=3){
 			C1 = 1;
 			C2 = 0;
 			Num = (pwm_width/10) % 10;
-		}else if(C<=5){
+		}else if(C<=4){
 			C2 = 1;
 			C3 = 0;
 			Num = pwm_width/100;
