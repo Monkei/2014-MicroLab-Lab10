@@ -12,7 +12,6 @@ bit pwm_flag = 0;
 
 int count, C;
 
-//void delay_ms(int t);
 void pwm_setup(unsigned char speed){
 	TMOD = 0;
 	pwm_width = speed;
@@ -23,21 +22,41 @@ void pwm_setup(unsigned char speed){
 
 void timer0() interrupt 1 {
 	C++;
-	if(C<=1){
-		C2 = C3 = 1;
-		C1 = 0;
-		Num = pwm_width % 10;
-	}else if(C<=2){
-		C1 = 1;
-		C2 = 0;
-		Num = (pwm_width/10) % 10;
-	}else if(C<=3){
-		C2 = 1;
-		C3 = 0;
-		Num = pwm_width/100;
-	}else {
-		C = 0;
-		C3 = 1;
+	if(pwm_width > 128)
+	{
+		if(C<=1){
+			C2 = C3 = 1;
+			C1 = 0;
+			Num = pwm_width % 10;
+		}else if(C<=4){
+			C1 = 1;
+			C2 = 0;
+			Num = (pwm_width/10) % 10;
+		}else if(C<=5){
+			C2 = 1;
+			C3 = 0;
+			Num = pwm_width/100;
+		}else {
+			C = 0;
+			C3 = 1;
+		}
+	}else{
+		if(C<=2){
+			C2 = C3 = 1;
+			C1 = 0;
+			Num = pwm_width % 10;
+		}else if(C<=4){
+			C1 = 1;
+			C2 = 0;
+			Num = (pwm_width/10) % 10;
+		}else if(C<=6){
+			C2 = 1;
+			C3 = 0;
+			Num = pwm_width/100;
+		}else {
+			C = 0;
+			C3 = 1;
+		}
 	}
 		
 	if(!pwm_flag) {	//Start of High level
@@ -56,44 +75,34 @@ void timer0() interrupt 1 {
 	}
 }
 
-void btn1() interrupt 0 {
-	if(pwm_width < 128)//if(pwm_width < 256)
-		++count;
-	if(count>16383)
-	{
-		count = 0;
-		++pwm_width;
-	}
-}
-
-void btn2() interrupt 2 {
-	if(pwm_width > 0)
-		++count;
-	if(count>16383)
-	{
-		count = 0;
-		--pwm_width;
-	}
-}
-/*
-void show_num(){
-	
-}*/
 void main()
 {
-	IE = 7;
 	count = 0;
 	C = 0;
 	pwm_setup(30);
 	P2 = 0x01;
 	while(1)
 	{
-		//show_num();
+		if(P33 == 0)
+		{
+			if(pwm_width > 0)
+				++count;
+			if(count>4096)
+			{
+				count = 0;
+				--pwm_width;
+			}
+		}
+		if(P32 == 0)
+		{
+			if(pwm_width < 255)
+				++count;
+			if(count>4096)
+			{
+				count = 0;
+				++pwm_width;
+			}
+		}
 	}
 
-}/*
-void delay_ms(int t){
-	int i;
-	while(t--)
-		for(i=0;i<1000;++i);
-}*/
+}
